@@ -22,6 +22,7 @@ library
   hs-source-dirs:      src
   default-language:    Haskell2010
   exposed-modules:     Database.KairosDB
+                     , Database.KairosDB.Internal.Types
 
 test-suite specs
   type:                exitcode-stdio-1.0

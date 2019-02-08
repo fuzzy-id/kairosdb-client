@@ -1,11 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Database.KairosDBSpec (spec) where
+module Database.KairosDB.Internal.TypesSpec (spec) where
 
-import           Data.Aeson           (eitherDecode)
-import           Data.ByteString.Lazy (ByteString)
-import           Test.Hspec           (Spec, describe, it, shouldBe)
+import Data.Aeson           (eitherDecode)
+import Data.ByteString.Lazy (ByteString)
+import Test.Hspec           (Spec, describe, it, shouldBe)
 
-import           Database.KairosDB
+import Database.KairosDB.Internal.Types
 
 spec :: Spec
 spec = describe "Parsing JSON" $ do
