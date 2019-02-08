@@ -14,7 +14,7 @@ spec :: Spec
 spec = describe "Parsing responses from JSON" $ do
     it "should parse minimal example" $
         eitherDecode minimal `shouldBe`
-            Right (WrappedQueryResponse [QueryResponse 0 [DataPointGroup "minimal" mempty []]])
+            Right (WrappedQueryResponse [QueryResponse 0 [DataPointGroup "minimal" mempty [] []]])
     it "should parse example with points" $
         eitherDecode withPoints `shouldBe`
             Right (WrappedQueryResponse
@@ -23,6 +23,7 @@ spec = describe "Parsing responses from JSON" $ do
                             [DataPointGroup
                                  "foo"
                                  (fromList [("baz",["bar"])])
+                                 [GroupByType "number"]
                                  [ (KairosTimestamp (UTCTime (fromGregorian 1970 1 1) (secondsToDiffTime 0)), 1.0)
                                  , (KairosTimestamp (UTCTime (fromGregorian 1970 1 1) (secondsToDiffTime 1)), 2.0)
                                  ]
