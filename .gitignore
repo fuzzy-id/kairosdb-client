@@ -1,2 +1,5 @@
 # Ignore hasktags output
 TAGS
+
+# Ignore build artifacts
+dist/
