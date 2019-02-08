@@ -3,8 +3,6 @@
 -- License  :  BSD3
 --
 -- Maintainer: Thomas Bach <hacking@babibo.de>
-{-# LANGUAGE DeriveGeneric     #-}
-{-# LANGUAGE OverloadedStrings #-}
 module Database.KairosDB
     ( module Database.KairosDB.Internal.Types
     ) where
