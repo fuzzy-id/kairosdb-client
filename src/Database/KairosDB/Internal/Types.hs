@@ -24,8 +24,9 @@ import Data.Time        (UTCTime (UTCTime), addUTCTime, fromGregorian,
                          secondsToDiffTime)
 import GHC.Generics     (Generic)
 
-newtype WrappedQueryResponse = WrappedQueryResponse { queries :: [QueryResponse] }
-                             deriving (Eq, Generic, Show)
+newtype WrappedQueryResponse =
+    WrappedQueryResponse { queries :: [QueryResponse] }
+    deriving (Eq, Generic, Show)
 
 instance FromJSON WrappedQueryResponse
 
@@ -39,12 +40,13 @@ instance FromJSON QueryResponse where
                     <$> v .: "sample_size"
                     <*> v .: "results"
 
-data DataPointGroup = DataPointGroup { name   :: Text
-                                     , tags   :: Map Text [Text]
-                                     , groupBy :: [GroupBy]
-                                     , values :: [(KairosTimestamp, Scientific)]
-                                     }
-                    deriving (Eq, Show)
+data DataPointGroup = DataPointGroup
+    { name    :: Text
+    , tags    :: Map Text [Text]
+    , groupBy :: [GroupBy]
+    , values  :: [(KairosTimestamp, Scientific)]
+    }
+    deriving (Eq, Show)
 
 instance FromJSON DataPointGroup where
     parseJSON = withObject "DataPointGroup" $ \v -> DataPointGroup
