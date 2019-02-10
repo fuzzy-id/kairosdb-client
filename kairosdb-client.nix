@@ -1,12 +1,12 @@
 { mkDerivation, aeson, base, bytestring, containers, hspec
-, hspec-discover, scientific, stdenv, text, time
+, hspec-discover, req, scientific, stdenv, text, time
 }:
 mkDerivation {
   pname = "kairosdb-client";
   version = "0.1.0.0";
   src = ./.;
   libraryHaskellDepends = [
-    aeson base bytestring containers scientific text time
+    aeson base bytestring containers req scientific text time
   ];
   testHaskellDepends = [
     aeson base bytestring containers hspec hspec-discover time
