@@ -9,6 +9,7 @@
 -- nomenclature as possible.
 {-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards   #-}
 module Database.KairosDB.Internal.Types
     ( -- * Query Responses from KairosDB
       QueryResponse(..)
@@ -16,18 +17,25 @@ module Database.KairosDB.Internal.Types
     , GroupBy(..)
     , KairosTimestamp(..)
     , WrappedQueryResponse(..)
+    -- * Constructing Queries
+    , QueryMetrics(..)
+    , Metric(..)
+    , Aggregator(..)
+    , Relative(..)
+    , KairosTimeunit(..)
     ) where
 
-import Data.Aeson       (FromJSON (..), Value (Number), withObject,
-                         withScientific, (.:), (.:?))
-import Data.Aeson.Types (typeMismatch)
+import Data.Aeson.Types (FromJSON (..), ToJSON (..), Value (Number, String),
+                         object, typeMismatch, withObject, (.:), (.:?), (.=))
 import Data.Map.Strict  (Map)
 import Data.Maybe       (fromMaybe)
 import Data.Scientific  (Scientific)
 import Data.Text        (Text)
-import Data.Time        (UTCTime (UTCTime), addUTCTime, fromGregorian,
-                         secondsToDiffTime)
+import Data.Time        (UTCTime (UTCTime), addUTCTime, diffUTCTime,
+                         fromGregorian, secondsToDiffTime)
 import GHC.Generics     (Generic)
+
+-- Query responses
 
 -- | Responses from KairosDB are wrapped in an additional `{
 -- "queries": [ ... results ... ] }`. You should not observe this type
@@ -39,8 +47,8 @@ newtype WrappedQueryResponse =
 instance FromJSON WrappedQueryResponse
 
 data QueryResponse = QueryResponse
-    { sampleSize :: Int              -- ^ The size of the result
-    , results    :: [DataPointGroup]
+    { queryResponseSampleSize :: Int              -- ^ The size of the result
+    , queryResponseResults    :: [DataPointGroup]
     }
     deriving (Eq, Show)
 
@@ -76,9 +84,16 @@ instance FromJSON KairosTimestamp where
     parseJSON v@(Number _) =
         KairosTimestamp . (`addUTCTime` epoch) . fromMilliSecs <$> parseJSON v
       where
-        epoch = UTCTime (fromGregorian 1970 1 1) (secondsToDiffTime 0)
-        fromMilliSecs x = x / realToFrac 1000
+        fromMilliSecs x = x / realToFrac (1000 :: Int)
     parseJSON v = typeMismatch "Milliseconds" v
+
+instance ToJSON KairosTimestamp where
+    toJSON = toJSON . toMilliSecs . (epoch `diffUTCTime`) . getUTCTime
+      where
+        toMilliSecs = (* realToFrac (1000 :: Int))
+
+epoch :: UTCTime
+epoch = UTCTime (fromGregorian 1970 1 1) (secondsToDiffTime 0)
 
 -- | Haskell representation of the several ways to group data points.
 data GroupBy = GroupByType Text
@@ -90,3 +105,76 @@ instance FromJSON GroupBy where
         case name of
           "type" -> GroupByType <$> v .: "type"
           _      -> fail ("Cannot handle group by: " <> name)
+
+-- Building queries
+
+-- TODO Add timezone
+data QueryMetrics = QueryMetrics
+    { queryMetricsStart     :: Either Relative KairosTimestamp
+    , queryMetricsEnd       :: Maybe (Either Relative KairosTimestamp)
+    , queryMetricsCacheTime :: Maybe Int
+    , queryMetricsMetrics   :: [Metric]
+    }
+    deriving (Eq, Show)
+
+instance ToJSON QueryMetrics where
+    toJSON QueryMetrics {..} = object
+        (start <> end <> cacheTime <> [ "metrics" .= queryMetricsMetrics ])
+      where
+        start = case queryMetricsStart of
+                  Left rel   -> ["start_relative" .= rel]
+                  Right abs' -> ["start_absolute" .= abs']
+        end = case queryMetricsEnd of
+                Nothing           -> []
+                Just (Left rel)   -> ["end_relative" .= rel]
+                Just (Right abs') -> ["end_absolute" .= abs']
+        cacheTime = case queryMetricsCacheTime of
+                      Nothing -> []
+                      Just t  -> ["cache_time" .= t]
+
+data Metric = Metric
+    { metricName        :: Text
+    , metricTags        :: Map Text [Text]
+    , metricLimit       :: Int
+    , metricAggregators :: [Aggregator]
+    }
+    deriving (Eq, Show)
+
+instance ToJSON Metric where
+    toJSON Metric {..} = object
+        [ "name"        .= metricName
+        , "tags"        .= metricTags
+        , "limit"       .= metricLimit
+        , "aggregators" .= metricAggregators
+        ]
+
+data Aggregator = Aggregator
+    { aggregatorName      :: Text
+    , aggregatiorSampling :: Relative
+    }
+    deriving (Eq, Show)
+
+instance ToJSON Aggregator where
+    toJSON (Aggregator n s) = object [ "name" .= n, "sampling" .= s ]
+
+data Relative = Relative { relativeValue :: Int
+                         , relativeUnit  :: KairosTimeunit
+                         }
+              deriving (Eq, Show)
+
+instance ToJSON Relative where
+    toJSON (Relative v u) = object [ "value" .= v, "unit" .= u ]
+
+data KairosTimeunit =
+    Milliseconds | Seconds | Minutes | Hours | Days | Weeks | Months | Years
+  deriving (Eq, Show)
+
+instance ToJSON KairosTimeunit where
+    toJSON Milliseconds = String "milliseconds"
+    toJSON Seconds      = String "seconds"
+    toJSON Minutes      = String "minutes"
+    toJSON Hours        = String "hours"
+    toJSON Days         = String "days"
+    toJSON Weeks        = String "weeks"
+    toJSON Months       = String "months"
+    toJSON Years        = String "years"

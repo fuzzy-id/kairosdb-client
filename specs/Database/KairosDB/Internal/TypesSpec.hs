@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Database.KairosDB.Internal.TypesSpec (spec) where
 
-import Data.Aeson           (eitherDecode)
+import Data.Aeson           (eitherDecode, encode)
 import Data.ByteString.Lazy (ByteString)
 import Data.Map.Strict      (fromList)
 import Data.Time            (UTCTime (UTCTime), fromGregorian,
@@ -11,24 +11,30 @@ import Test.Hspec           (Spec, describe, it, shouldBe)
 import Database.KairosDB.Internal.Types
 
 spec :: Spec
-spec = describe "Parsing responses from JSON" $ do
-    it "should parse minimal example" $
-        eitherDecode minimal `shouldBe`
-            Right (WrappedQueryResponse [QueryResponse 0 [DataPointGroup "minimal" mempty [] []]])
-    it "should parse example with points" $
-        eitherDecode withPoints `shouldBe`
-            Right (WrappedQueryResponse
-                       [QueryResponse
-                            2
-                            [DataPointGroup
-                                 "foo"
-                                 (fromList [("baz",["bar"])])
-                                 [GroupByType "number"]
-                                 [ (KairosTimestamp (UTCTime (fromGregorian 1970 1 1) (secondsToDiffTime 0)), 1.0)
-                                 , (KairosTimestamp (UTCTime (fromGregorian 1970 1 1) (secondsToDiffTime 1)), 2.0)
-                                 ]
-                            ]
-                       ])
+spec = do
+    describe "Decoding JSON" $ do
+        it "should work on minimal example" $
+            eitherDecode minimal `shouldBe`
+                Right (WrappedQueryResponse [QueryResponse 0 [DataPointGroup "minimal" mempty [] []]])
+        it "should work on example with points" $
+            eitherDecode withPoints `shouldBe`
+                Right (WrappedQueryResponse
+                           [QueryResponse
+                                2
+                                [DataPointGroup
+                                     "foo"
+                                     (fromList [("baz",["bar"])])
+                                     [GroupByType "number"]
+                                     [ (KairosTimestamp (UTCTime (fromGregorian 1970 1 1) (secondsToDiffTime 0)), 1.0)
+                                     , (KairosTimestamp (UTCTime (fromGregorian 1970 1 1) (secondsToDiffTime 1)), 2.0)
+                                     ]
+                                ]
+                           ])
+    describe "Encoding JSON" $ do
+        it "should work on query" $
+            encode (QueryMetrics (Left (Relative 5 Minutes)) Nothing Nothing [])
+                `shouldBe` "{\"metrics\":[],\"start_relative\":{\"value\":5,\"unit\":\"minutes\"}}"
+
 
 minimal :: ByteString
 minimal = "{\"queries\":[{\"sample_size\":0,\"results\":[{\"name\":\"minimal\",\"tags\":{},\"values\":[]}]}]}"
