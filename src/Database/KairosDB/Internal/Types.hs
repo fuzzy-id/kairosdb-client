@@ -128,26 +128,27 @@ instance ToJSON QueryMetrics where
                 Nothing           -> []
                 Just (Left rel)   -> ["end_relative" .= rel]
                 Just (Right abs') -> ["end_absolute" .= abs']
-        cacheTime = case queryMetricsCacheTime of
-                      Nothing -> []
-                      Just t  -> ["cache_time" .= t]
+        cacheTime = maybe [] (\t -> ["cache_time" .= t]) queryMetricsCacheTime
 
 data Metric = Metric
     { metricName        :: Text
     , metricTags        :: Map Text [Text]
-    , metricLimit       :: Int
+    , metricLimit       :: Maybe Int
     , metricAggregators :: [Aggregator]
     }
     deriving (Eq, Show)
 
 instance ToJSON Metric where
     toJSON Metric {..} = object
-        [ "name"        .= metricName
-        , "tags"        .= metricTags
-        , "limit"       .= metricLimit
-        , "aggregators" .= metricAggregators
-        ]
-
+        (tags <> limit <> aggs <> ["name" .= metricName])
+      where
+        tags = if metricTags == mempty
+                  then []
+                  else ["tags" .= metricTags]
+        limit = maybe [] (\l -> ["limit" .= l]) metricLimit
+        aggs = if metricAggregators == mempty
+                  then []
+                  else ["aggregators" .= metricAggregators]
 data Aggregator = Aggregator
     { aggregatorName      :: Text
     , aggregatiorSampling :: Relative

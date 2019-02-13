@@ -1,5 +1,5 @@
 name:                kairosdb-client
-version:             0.1.0.0
+version:             0.2.0.0
 synopsis:            KairosDB client for Haskell
 description:         Client for the REST API of KairosDB
 license:             BSD3
@@ -13,28 +13,34 @@ tested-with:         GHC==8.4.4
 
 library
   ghc-options:         -Wall -Werror
-  build-depends:       aeson      >=1.3  && <1.4
-                     , base       >=4.11 && <4.12
-                     , bytestring >=0.10 && <0.11
-                     , containers >=0.5  && <0.6
-                     , req        >=1.1  && <1.2
-                     , scientific >=0.3  && <0.4
-                     , text       >=1.2  && <1.3
-                     , time       >=1.8  && <1.9
+  build-depends:       aeson           >=1.3  && <1.4
+                     , base            >=4.11 && <4.12
+                     , bytestring      >=0.10 && <0.11
+                     , containers      >=0.5  && <0.6
+                     , connection      >=0.2  && <0.3
+                     , data-default    >=0.7  && <0.8
+                     , http-client     >=0.5  && <0.6
+                     , http-client-tls >=0.3  && <0.4
+                     , req             >=1.1  && <1.2
+                     , scientific      >=0.3  && <0.4
+                     , text            >=1.2  && <1.3
+                     , time            >=1.8  && <1.9
   hs-source-dirs:      src
   default-language:    Haskell2010
   exposed-modules:     Database.KairosDB
+                     , Database.KairosDB.Internal.Config
                      , Database.KairosDB.Internal.Types
 
 test-suite specs
   type:                exitcode-stdio-1.0
   main-is:             Specs.hs
-  ghc-options:         -Wall -Werror -Wno-missing-home-modules
+  ghc-options:         -Wall -Wno-missing-home-modules
   build-depends:       kairosdb-client
                      , aeson
                      , base
                      , bytestring
                      , containers
+                     , req
                      , time
                      , hspec          >=2.5  && <2.6
                      , hspec-discover >=2.5  && <2.6
