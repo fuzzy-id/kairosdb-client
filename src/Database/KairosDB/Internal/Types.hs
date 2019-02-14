@@ -150,8 +150,8 @@ instance ToJSON Metric where
                   then []
                   else ["aggregators" .= metricAggregators]
 data Aggregator = Aggregator
-    { aggregatorName      :: Text
-    , aggregatiorSampling :: Relative
+    { aggregatorName     :: Text
+    , aggregatorSampling :: Relative
     }
     deriving (Eq, Show)
 

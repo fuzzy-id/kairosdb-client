@@ -1,5 +1,5 @@
 name:                kairosdb-client
-version:             0.2.0.0
+version:             0.2.0.1
 synopsis:            KairosDB client for Haskell
 description:         Client for the REST API of KairosDB
 license:             BSD3
