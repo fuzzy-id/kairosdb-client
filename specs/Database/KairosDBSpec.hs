@@ -1,8 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Database.KairosDBSpec (spec) where
 
-import Data.Map.Strict (fromList)
-import Test.Hspec      (Spec, beforeAll, describe, it, shouldReturn)
+import Data.HashMap.Strict (fromList)
+import Test.Hspec          (Spec, beforeAll, describe, it, shouldReturn)
 
 import Database.KairosDB
 

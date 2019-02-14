@@ -25,15 +25,15 @@ module Database.KairosDB.Internal.Types
     , KairosTimeunit(..)
     ) where
 
-import Data.Aeson.Types (FromJSON (..), ToJSON (..), Value (Number, String),
-                         object, typeMismatch, withObject, (.:), (.:?), (.=))
-import Data.Map.Strict  (Map)
-import Data.Maybe       (fromMaybe)
-import Data.Scientific  (Scientific)
-import Data.Text        (Text)
-import Data.Time        (UTCTime (UTCTime), addUTCTime, diffUTCTime,
-                         fromGregorian, secondsToDiffTime)
-import GHC.Generics     (Generic)
+import Data.Aeson.Types    (FromJSON (..), ToJSON (..), Value (Number, String),
+                            object, typeMismatch, withObject, (.:), (.:?), (.=))
+import Data.HashMap.Strict (HashMap, toList)
+import Data.Maybe          (fromMaybe)
+import Data.Scientific     (Scientific)
+import Data.Text           (Text)
+import Data.Time           (UTCTime (UTCTime), addUTCTime, diffUTCTime,
+                            fromGregorian, secondsToDiffTime)
+import GHC.Generics        (Generic)
 
 -- Query responses
 
@@ -61,7 +61,7 @@ instance FromJSON QueryResponse where
 -- and value.
 data DataPointGroup = DataPointGroup
     { name    :: Text
-    , tags    :: Map Text [Text]
+    , tags    :: HashMap Text [Text]
     , groupBy :: [GroupBy]
     , values  :: [(KairosTimestamp, Scientific)]
     }
@@ -132,7 +132,7 @@ instance ToJSON QueryMetrics where
 
 data Metric = Metric
     { metricName        :: Text
-    , metricTags        :: Map Text [Text]
+    , metricTags        :: HashMap Text [Text]
     , metricLimit       :: Maybe Int
     , metricAggregators :: [Aggregator]
     }
@@ -140,7 +140,7 @@ data Metric = Metric
 
 instance ToJSON Metric where
     toJSON Metric {..} = object
-        (tags <> limit <> aggs <> ["name" .= metricName])
+        (["name" .= metricName] <> tags <> limit <> aggs)
       where
         tags = if metricTags == mempty
                   then []
@@ -150,13 +150,18 @@ instance ToJSON Metric where
                   then []
                   else ["aggregators" .= metricAggregators]
 data Aggregator = Aggregator
-    { aggregatorName     :: Text
-    , aggregatorSampling :: Relative
+    { aggregatorName       :: Text
+    , aggregatorSampling   :: Maybe Relative
+    , aggregatorAdditional :: HashMap Text Value
     }
     deriving (Eq, Show)
 
 instance ToJSON Aggregator where
-    toJSON (Aggregator n s) = object [ "name" .= n, "sampling" .= s ]
+    toJSON Aggregator {..} = object
+        ([ "name" .= aggregatorName] <> sampling <> additional)
+      where
+        sampling = maybe [] (\s -> ["sampling" .= s]) aggregatorSampling
+        additional = toList aggregatorAdditional
 
 data Relative = Relative { relativeValue :: Int
                          , relativeUnit  :: KairosTimeunit

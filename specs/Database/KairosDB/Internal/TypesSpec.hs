@@ -3,7 +3,7 @@ module Database.KairosDB.Internal.TypesSpec (spec) where
 
 import Data.Aeson           (eitherDecode, encode)
 import Data.ByteString.Lazy (ByteString)
-import Data.Map.Strict      (fromList)
+import Data.HashMap.Strict  (fromList)
 import Data.Time            (UTCTime (UTCTime), fromGregorian,
                              secondsToDiffTime)
 import Test.Hspec           (Spec, describe, it, shouldBe)
