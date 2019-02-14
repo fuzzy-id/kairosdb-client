@@ -21,10 +21,10 @@ import Network.HTTP.Req       (JsonResponse, MonadHttp, POST (POST),
 import Database.KairosDB.Internal.Config
 import Database.KairosDB.Internal.Types
 
-query :: MonadIO m
+query :: (FromJSON a, MonadIO m)
       => KairosDBSettings
       -> QueryMetrics
-      -> m (WrappedQueryResponse)
+      -> m (WrappedQueryResponse a)
 query s q = responseBody <$> runReq httpConfig request
   where
     request = mkQuery (\base -> base /~ "datapoints" /~ "query") s q

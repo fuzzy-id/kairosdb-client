@@ -29,7 +29,6 @@ import Data.Aeson.Types    (FromJSON (..), ToJSON (..), Value (Number, String),
                             object, typeMismatch, withObject, (.:), (.:?), (.=))
 import Data.HashMap.Strict (HashMap, toList)
 import Data.Maybe          (fromMaybe)
-import Data.Scientific     (Scientific)
 import Data.Text           (Text)
 import Data.Time           (UTCTime (UTCTime), addUTCTime, diffUTCTime,
                             fromGregorian, secondsToDiffTime)
@@ -40,34 +39,34 @@ import GHC.Generics        (Generic)
 -- | Responses from KairosDB are wrapped in an additional `{
 -- "queries": [ ... results ... ] }`. You should not observe this type
 -- in any high-level functions.
-newtype WrappedQueryResponse =
-    WrappedQueryResponse { queries :: [QueryResponse] }
+newtype WrappedQueryResponse a =
+    WrappedQueryResponse { queries :: [QueryResponse a] }
     deriving (Eq, Generic, Show)
 
-instance FromJSON WrappedQueryResponse
+instance FromJSON a => FromJSON (WrappedQueryResponse a)
 
-data QueryResponse = QueryResponse
+data QueryResponse a = QueryResponse
     { queryResponseSampleSize :: Int              -- ^ The size of the result
-    , queryResponseResults    :: [DataPointGroup]
+    , queryResponseResults    :: [DataPointGroup a]
     }
     deriving (Eq, Show)
 
-instance FromJSON QueryResponse where
+instance FromJSON a => FromJSON (QueryResponse a) where
     parseJSON = withObject "QueryResponse" $ \v -> QueryResponse
                     <$> v .: "sample_size"
                     <*> v .: "results"
 
 -- | A group of data points where a data point is a tuple of timestamp
 -- and value.
-data DataPointGroup = DataPointGroup
+data DataPointGroup a = DataPointGroup
     { name    :: Text
     , tags    :: HashMap Text [Text]
     , groupBy :: [GroupBy]
-    , values  :: [(KairosTimestamp, Scientific)]
+    , values  :: [(KairosTimestamp, a)]
     }
     deriving (Eq, Show)
 
-instance FromJSON DataPointGroup where
+instance FromJSON a => FromJSON (DataPointGroup a) where
     parseJSON = withObject "DataPointGroup" $ \v -> DataPointGroup
                     <$> v .: "name"
                     <*> v .: "tags"

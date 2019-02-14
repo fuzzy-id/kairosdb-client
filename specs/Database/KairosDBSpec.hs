@@ -14,6 +14,7 @@ spec = beforeAll kairosDBSettingsFromEnv $ do
     describe "query with non-existent metric" $ do
         let expected = WrappedQueryResponse
                 [QueryResponse 0 [DataPointGroup "non-existent" mempty mempty mempty]]
+                :: WrappedQueryResponse ()
         it "should return an empty datapoint" $ \settings -> do
             query settings nonExistentReq `shouldReturn` expected
         it "should have tags appended" $ \settings -> do
@@ -22,7 +23,7 @@ spec = beforeAll kairosDBSettingsFromEnv $ do
 emptyReq :: QueryMetrics
 emptyReq = QueryMetrics (Left (Relative 1 Years)) Nothing Nothing []
 
-emptyResp :: WrappedQueryResponse
+emptyResp :: WrappedQueryResponse ()
 emptyResp = WrappedQueryResponse []
 
 nonExistentReq :: QueryMetrics
