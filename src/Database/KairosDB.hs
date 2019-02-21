@@ -6,7 +6,7 @@
 {-# LANGUAGE RankNTypes      #-}
 {-# LANGUAGE RecordWildCards #-}
 module Database.KairosDB
-    ( module Database.KairosDB.Internal.Types
+    ( module Database.KairosDB.Internal.QueryMetrics
     , module Database.KairosDB.Internal.Config
     , query
     ) where
@@ -19,7 +19,7 @@ import Network.HTTP.Req       (JsonResponse, MonadHttp, POST (POST),
                                responseBody, runReq, (/~))
 
 import Database.KairosDB.Internal.Config
-import Database.KairosDB.Internal.Types
+import Database.KairosDB.Internal.QueryMetrics
 
 query :: (FromJSON a, MonadIO m)
       => KairosDBSettings

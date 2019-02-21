@@ -10,7 +10,7 @@
 {-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
-module Database.KairosDB.Internal.Types
+module Database.KairosDB.Internal.QueryMetrics
     ( -- * Query Responses from KairosDB
       QueryResponse(..)
     , DataPointGroup(..)

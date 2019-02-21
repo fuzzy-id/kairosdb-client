@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Database.KairosDB.Internal.TypesSpec (spec) where
+module Database.KairosDB.Internal.QueryMetricsSpec (spec) where
 
 import Data.Aeson           (eitherDecode, encode)
 import Data.ByteString.Lazy (ByteString)
@@ -8,7 +8,7 @@ import Data.Time            (UTCTime (UTCTime), fromGregorian,
                              secondsToDiffTime)
 import Test.Hspec           (Spec, describe, it, shouldBe)
 
-import Database.KairosDB.Internal.Types
+import Database.KairosDB.Internal.QueryMetrics
 
 spec :: Spec
 spec = do
