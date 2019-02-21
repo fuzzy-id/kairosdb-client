@@ -9,6 +9,7 @@ import Data.Time            (UTCTime (UTCTime), fromGregorian,
 import Test.Hspec           (Spec, describe, it, shouldBe)
 
 import Database.KairosDB.Internal.QueryMetrics
+import Database.KairosDB.Internal.Time
 
 spec :: Spec
 spec = do
