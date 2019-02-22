@@ -20,6 +20,13 @@ spec =
           eitherDecode "0" `shouldBe` Right epoch
       it "should decode 1000 to epoch plus one sec" $
           eitherDecode "1000" `shouldBe` Right epochPlusOneSec
+    describe "adding time" $ do
+      it "should work with positive NominalDiffTime" $
+        addToKairosTimestamp (toEnum $ 10^(12 :: Int)) epoch
+          `shouldBe` epochPlusOneSec
+      it "should work with negative NominalDiffTime" $
+        addToKairosTimestamp (toEnum $ -10^(12 :: Int)) epochPlusOneSec
+          `shouldBe` epoch
 
 epoch :: KairosTimestamp
 epoch = KairosTimestamp (UTCTime (fromGregorian 1970 1 1) (secondsToDiffTime 0))

@@ -5,18 +5,22 @@
 --
 module Database.KairosDB.Internal.Time
     ( KairosTimestamp(..)
+    , addToKairosTimestamp
     ) where
 
 import Data.Aeson       (FromJSON (parseJSON), ToJSON (toJSON), Value (Number))
 import Data.Aeson.Types (typeMismatch)
-import Data.Time        (UTCTime (UTCTime), addUTCTime, diffUTCTime,
-                         fromGregorian, secondsToDiffTime)
+import Data.Time        (NominalDiffTime, UTCTime (UTCTime), addUTCTime,
+                         diffUTCTime, fromGregorian, secondsToDiffTime)
 
 -- | KairosDB represents time as milliseconds since epoch. This is a
 -- simple wrapper around 'UTCTime' to ensure proper JSON
 -- (de-)serialization.
 newtype KairosTimestamp = KairosTimestamp { getUTCTime :: UTCTime }
-                        deriving (Eq, Show)
+                        deriving (Eq, Ord, Show)
+
+addToKairosTimestamp :: NominalDiffTime -> KairosTimestamp -> KairosTimestamp
+addToKairosTimestamp x (KairosTimestamp ts) = KairosTimestamp (addUTCTime x ts)
 
 instance FromJSON KairosTimestamp where
     parseJSON v@(Number _) =
