@@ -26,7 +26,7 @@ instance FromJSON KairosTimestamp where
     parseJSON v = typeMismatch "Milliseconds" v
 
 instance ToJSON KairosTimestamp where
-    toJSON = toJSON . toMilliSecs . (epoch `diffUTCTime`) . getUTCTime
+    toJSON = toJSON . toMilliSecs . (`diffUTCTime` epoch) . getUTCTime
       where
         toMilliSecs = (* realToFrac (1000 :: Int))
 
