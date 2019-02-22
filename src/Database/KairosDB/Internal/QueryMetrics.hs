@@ -58,10 +58,10 @@ instance FromJSON a => FromJSON (QueryResponse a) where
 -- | A group of data points where a data point is a tuple of timestamp
 -- and value.
 data DataPointGroup a = DataPointGroup
-    { name    :: Text
-    , tags    :: HashMap Text [Text]
-    , groupBy :: [GroupBy]
-    , values  :: [(KairosTimestamp, a)]
+    { dataPointGroupName    :: Text
+    , dataPointGroupTags    :: HashMap Text [Text]
+    , dataPointGroupGroupBy :: [GroupBy]
+    , dataPointGroupValues  :: [(KairosTimestamp, a)]
     }
     deriving (Eq, Show)
 
