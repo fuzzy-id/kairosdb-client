@@ -30,8 +30,12 @@ import Database.KairosDB.Internal.Time
 query :: (FromJSON a, MonadIO m)
       => KairosDBSettings
       -> QueryMetrics
-      -> m (ApiResponse (WrappedQueryResponse a))
-query s q = runReq httpConfig request
+      -> m [QueryResponse a]
+query s q =
+    do res <- runReq httpConfig request
+       case res of
+         Success (WrappedQueryResponse x) -> return x
+         SuccessNoContent                 -> undefined
   where
     request = mkRequest (\base -> base /~ "datapoints" /~ "query") s q
     httpConfig = kairosDBSettingsHttpConfig s
@@ -39,10 +43,15 @@ query s q = runReq httpConfig request
 datapoints :: (MonadIO m, ToJSON a)
            => KairosDBSettings
            -> [DataPoints a]
-           -> m (ApiResponse ())
-datapoints s points = runReq httpConfig request
+           -> m ()
+datapoints s points =
+    do res <- runReq httpConfig request
+       case res  of
+         Success ()       -> undefined
+         SuccessNoContent -> return ()
   where
     httpConfig = kairosDBSettingsHttpConfig s
+    request :: MonadHttp m => m (ApiResponse ())
     request = mkRequest (\base -> base /~ "datapoints") s points
 
 mkRequest :: (MonadHttp m, ToJSON body, FromJSON a)
