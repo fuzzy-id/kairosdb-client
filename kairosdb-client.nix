@@ -4,7 +4,7 @@
 }:
 mkDerivation {
   pname = "kairosdb-client";
-  version = "0.4.1.0";
+  version = "0.4.1.1";
   src = ./.;
   libraryHaskellDepends = [
     aeson base bytestring connection data-default http-client
